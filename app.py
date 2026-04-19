@@ -162,8 +162,20 @@ hr { border-color: #1e2a3a !important; }
 #  AUTH LAYER
 # ══════════════════════════════════════════════════════════════════
 
-with open("config.yaml") as f:
-    config = yaml.load(f, Loader=SafeLoader)
+import os
+
+if os.path.exists("config.yaml"):
+    with open("config.yaml") as f:
+        config = yaml.load(f, Loader=SafeLoader)
+else:
+    config = {
+        "credentials": {
+            "usernames": {
+                k: dict(v) for k, v in st.secrets["credentials"]["usernames"].items()
+            }
+        },
+        "cookie": dict(st.secrets["cookie"]),
+    }
 
 authenticator = stauth.Authenticate(
     config["credentials"],
@@ -410,10 +422,9 @@ with tab1:
                 text=[f"{v:,.0f}" for v in grouped[num_col]], textposition="outside",
                 textfont=dict(color="#94a3b8", size=11),
             ))
-            fig.update_layout(**PLOTLY_THEME, height=350, title=f"Top {top_n} {cat_col} by {num_col}",
-                              yaxis=dict(tickfont=dict(color="#94a3b8",size=11),gridcolor="#1e2a3a",linecolor="#1e2a3a"),
-                              xaxis=dict(gridcolor="#1e2a3a",linecolor="#1e2a3a",tickfont=dict(color="#64748b")))
-            st.plotly_chart(fig, use_container_width=True)
+            fig.update_layout(**PLOTLY_THEME, height=350, title=f"Top {top_n} {cat_col} by {num_col}")
+            fig.update_yaxes(tickfont=dict(color="#94a3b8", size=11), gridcolor="#1e2a3a", linecolor="#1e2a3a")
+            fig.update_xaxes(gridcolor="#1e2a3a", linecolor="#1e2a3a", tickfont=dict(color="#64748b"))
 
         st.markdown('<div class="section-label">// Category Share</div>', unsafe_allow_html=True)
         pie_cat = st.selectbox("Category for pie", cat_cols, key="pie_cat")
